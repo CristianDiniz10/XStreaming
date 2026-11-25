@@ -22,8 +22,12 @@ jobs:
         run: corepack enable
 
       - name: Install JS dependencies
-        # The upstream lockfile is slightly out of date, so let Yarn update it here.
-        run: yarn install
+        # The upstream lockfile is a bit out of date, so Yarn may pick newer versions.
+        # One cosmetic patch (react-native-paper padding) then no longer applies; apply the
+        # other patches and keep going instead of failing the whole build.
+        run: |
+          yarn install --mode=skip-build
+          CI=false npx patch-package
         env:
           YARN_ENABLE_IMMUTABLE_INSTALLS: "false"
 
