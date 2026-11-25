@@ -32,10 +32,12 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - uses: android-actions/setup-android@v3
-
+      # The GitHub runner already ships the Android SDK (ANDROID_HOME); only add the NDK.
       - name: Install Android NDK
-        run: sdkmanager "ndk;23.1.7779620"
+        run: |
+          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          [ -x "$SDKM" ] || SDKM="$(ls -d $ANDROID_HOME/cmdline-tools/*/bin/sdkmanager | tail -1)"
+          yes | "$SDKM" --install "ndk;23.1.7779620" > /dev/null
 
       - name: Install Rust Android targets (for the "nano" engine)
         run: rustup target add aarch64-linux-android armv7-linux-androideabi
