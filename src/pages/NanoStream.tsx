@@ -23,6 +23,9 @@ import VirtualGamepad from '../components/VirtualGamepad';
 import CustomVirtualGamepad from '../components/CustomVirtualGamepad';
 import RecordingIndicator from '../components/RecordingIndicator';
 import gameRecorder from '../utils/gameRecorder';
+import liveStream from '../utils/liveStream';
+import useLiveStream from '../utils/useLiveStream';
+import LiveIndicator from '../components/LiveIndicator';
 import screenshot from '../utils/screenshot';
 import {VIRTUAL_MACRO_BUTTON_NAME} from '../utils/virtualMacro';
 import sessionStatsTracker from '../utils/sessionStatsTracker';
@@ -183,6 +186,9 @@ function NanoStreamScreen({navigation, route}: any) {
     !!settings.show_virtual_gamead,
   );
   const [isRecording, setIsRecording] = React.useState(false);
+  // NOTE: the Nano engine has no "send me a keyframe" command, so YouTube may
+  // warn about the keyframe interval. The default (native) engine is recommended for lives.
+  const {liveState, bitrateKbps, toggleLive} = useLiveStream();
 
   React.useEffect(() => {
     return () => {
@@ -436,12 +442,18 @@ function NanoStreamScreen({navigation, route}: any) {
 
     const activeRecording = await gameRecorder.isRecording().catch(() => false);
     setIsRecording(activeRecording);
+    const activeLive = await liveStream.getLiveState().catch(() => 'idle');
 
     const items: Array<{id: string; title: string}> = [];
     if (isConnectedRef.current) {
       items.push({
         id: 'toggleVirtualGamepad',
         title: t('Toggle Virtual Gamepad'),
+      });
+      items.push({
+        id: 'toggleLive',
+        title:
+          activeLive !== 'idle' ? `🔴 ${t('LiveStop')}` : `🔴 ${t('LiveStart')}`,
       });
       items.push({
         id: 'toggleRecording',
@@ -483,6 +495,10 @@ function NanoStreamScreen({navigation, route}: any) {
       case 'toggleVirtualGamepad':
         setShowVirtualGamepad(value => !value);
         break;
+      case 'toggleLive': {
+        await toggleLive();
+        break;
+      }
       case 'toggleRecording': {
         const currentlyRecording = await gameRecorder.isRecording().catch(() => false);
         if (currentlyRecording) {
@@ -533,7 +549,7 @@ function NanoStreamScreen({navigation, route}: any) {
       default:
         break;
     }
-  }, [handleExit, isRecording, sendNexusPress, showNativeOptionsDialog, streamType, t]);
+  }, [handleExit, isRecording, sendNexusPress, showNativeOptionsDialog, streamType, t, toggleLive]);
 
   React.useEffect(() => {
     const isUsbMode = !!route.params?.isUsbMode;
@@ -1273,6 +1289,7 @@ function NanoStreamScreen({navigation, route}: any) {
         <PerfPanel performance={performance} streamType={streamType} />
       )}
       <RecordingIndicator visible={isRecording} />
+      <LiveIndicator state={liveState} bitrateKbps={bitrateKbps} />
       {renderVirtualGamepad()}
     </View>
   );

@@ -1,0 +1,53 @@
+# Builds the "XStreaming Live" APK in the cloud (GitHub Actions).
+# Open the "Actions" tab > "Build Live APK" > latest run > download "xstreaming-live-apk".
+name: Build Live APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [live-youtube]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Enable Yarn (corepack)
+        run: corepack enable
+
+      - name: Install JS dependencies
+        run: yarn install --immutable || yarn install
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK
+        run: sdkmanager "ndk;23.1.7779620"
+
+      - name: Install Rust Android targets (for the "nano" engine)
+        run: rustup target add aarch64-linux-android armv7-linux-androideabi
+
+      - name: Build APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleLiveRelease --no-daemon --stacktrace \
+            -PXSTREAMING_RELEASE_STORE_FILE=debug.keystore \
+            -PXSTREAMING_RELEASE_STORE_PASSWORD=android \
+            -PXSTREAMING_RELEASE_KEY_ALIAS=androiddebugkey \
+            -PXSTREAMING_RELEASE_KEY_PASSWORD=android
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xstreaming-live-apk
+          path: android/app/build/outputs/apk/live/release/*.apk

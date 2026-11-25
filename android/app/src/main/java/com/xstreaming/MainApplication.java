@@ -70,6 +70,7 @@ public class MainApplication extends Application implements ReactApplication {
             packages.add(new FrameGenAssetPackage());
             packages.add(new ShortcutManagerPackage());
             packages.add(new GameRecorderPackage());
+            packages.add(new com.xstreaming.live.LiveStreamPackage());
             packages.add(new ScreenshotPackage());
           return packages;
         }

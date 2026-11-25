@@ -61,6 +61,14 @@ class LowLatencyVideoDecoder implements VideoDecoder {
                 if (isKey) {
                     com.xstreaming.recording.GameRecorder.getInstance().cacheSpsPps(frame.buffer);
                 }
+                if (com.xstreaming.live.LiveStreamer.getInstance().isActive()) {
+                    com.xstreaming.live.LiveStreamer.getInstance().feedVideoFrame(
+                            frame.buffer,
+                            isKey,
+                            frame.encodedWidth > 0 ? frame.encodedWidth : streamWidth,
+                            frame.encodedHeight > 0 ? frame.encodedHeight : streamHeight
+                    );
+                }
                 if (com.xstreaming.recording.GameRecorder.getInstance().isRecording()) {
                     int width = frame.encodedWidth > 0 ? frame.encodedWidth : streamWidth;
                     int height = frame.encodedHeight > 0 ? frame.encodedHeight : streamHeight;

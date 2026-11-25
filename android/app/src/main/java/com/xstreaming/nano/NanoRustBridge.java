@@ -291,6 +291,9 @@ public final class NanoRustBridge {
         if (keyframe && data != null) {
             com.xstreaming.recording.GameRecorder.getInstance().cacheSpsPps(data);
         }
+        if (com.xstreaming.live.LiveStreamer.getInstance().isActive() && data != null) {
+            com.xstreaming.live.LiveStreamer.getInstance().feedVideoFrame(data, keyframe, videoWidth, videoHeight);
+        }
         if (com.xstreaming.recording.GameRecorder.getInstance().isRecording()) {
             com.xstreaming.recording.GameRecorder.getInstance().feedVideoFrame(
                     data,
@@ -976,6 +979,13 @@ public final class NanoRustBridge {
                     outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
                     int written;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        if (com.xstreaming.live.LiveStreamer.getInstance().isActive()) {
+                            ByteBuffer liveCopy = outputBuffer.duplicate();
+                            liveCopy.position(bufferInfo.offset);
+                            liveCopy.limit(bufferInfo.offset + bufferInfo.size);
+                            com.xstreaming.live.LiveStreamer.getInstance().feedGameAudio(
+                                    liveCopy, audioSampleRate, audioChannelCount);
+                        }
                         if (com.xstreaming.recording.GameRecorder.getInstance().isRecording()) {
                             ByteBuffer audioCopy = outputBuffer.duplicate();
                             audioCopy.position(bufferInfo.offset);

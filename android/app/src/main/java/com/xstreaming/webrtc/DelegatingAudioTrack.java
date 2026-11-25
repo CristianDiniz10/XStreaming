@@ -80,6 +80,15 @@ public class DelegatingAudioTrack extends AudioTrack {
 
     @Override
     public int write(@NonNull ByteBuffer audioData, int sizeInBytes, int writeMode) {
+        if (com.xstreaming.live.LiveStreamer.getInstance().isActive() && sizeInBytes > 0) {
+            try {
+                ByteBuffer live = audioData.duplicate();
+                live.limit(Math.min(live.limit(), live.position() + sizeInBytes));
+                com.xstreaming.live.LiveStreamer.getInstance().feedGameAudio(live, mSampleRate, mChannelCount);
+            } catch (Throwable t) {
+                Log.w(TAG, "Error sending audio to live", t);
+            }
+        }
         if (GameRecorder.getInstance().isRecording() && sizeInBytes > 0) {
             try {
                 int pos = audioData.position();
@@ -97,6 +106,10 @@ public class DelegatingAudioTrack extends AudioTrack {
 
     @Override
     public int write(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes) {
+        if (com.xstreaming.live.LiveStreamer.getInstance().isActive() && sizeInBytes > 0) {
+            com.xstreaming.live.LiveStreamer.getInstance().feedGameAudio(
+                    ByteBuffer.wrap(audioData, offsetInBytes, sizeInBytes), mSampleRate, mChannelCount);
+        }
         if (GameRecorder.getInstance().isRecording() && sizeInBytes > 0) {
             try {
                 ByteBuffer wrap = ByteBuffer.wrap(audioData, offsetInBytes, sizeInBytes);
@@ -110,6 +123,10 @@ public class DelegatingAudioTrack extends AudioTrack {
 
     @Override
     public int write(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes, int writeMode) {
+        if (com.xstreaming.live.LiveStreamer.getInstance().isActive() && sizeInBytes > 0) {
+            com.xstreaming.live.LiveStreamer.getInstance().feedGameAudio(
+                    ByteBuffer.wrap(audioData, offsetInBytes, sizeInBytes), mSampleRate, mChannelCount);
+        }
         if (GameRecorder.getInstance().isRecording() && sizeInBytes > 0) {
             try {
                 ByteBuffer wrap = ByteBuffer.wrap(audioData, offsetInBytes, sizeInBytes);

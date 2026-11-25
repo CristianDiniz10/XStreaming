@@ -175,6 +175,8 @@ function SettingsScreen({navigation}) {
       }
       navigation.navigate('Display');
     });
+    // live (YouTube)
+    list.push(() => navigation.navigate('LiveSettings'));
     // gamepad
     gamepad.forEach(meta => {
       list.push(() => handleItemPress(meta.name));
@@ -412,6 +414,21 @@ function SettingsScreen({navigation}) {
               navigation.navigate('Display');
             },
             'display_custom',
+          )}
+        </React.Fragment>
+
+        <React.Fragment key="live">
+          <View style={styles.contentTitle}>
+            <Text variant="titleLarge" style={titleTextStyle}>
+              🔴 {t('LiveSectionTitle')}
+            </Text>
+          </View>
+
+          {renderItem(
+            t('LiveSettingsTitle'),
+            t('LiveSettingsDesc'),
+            () => navigation.navigate('LiveSettings'),
+            'live_settings',
           )}
         </React.Fragment>
 

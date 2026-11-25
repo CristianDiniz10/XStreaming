@@ -41,6 +41,9 @@ import VirtualGamepadEditor, {
 import PerfPanel from '../components/PerfPanel';
 import RecordingIndicator from '../components/RecordingIndicator';
 import gameRecorder from '../utils/gameRecorder';
+import liveStream from '../utils/liveStream';
+import useLiveStream from '../utils/useLiveStream';
+import LiveIndicator from '../components/LiveIndicator';
 import screenshot from '../utils/screenshot';
 import RTCFsrView from '../components/RTCFsrView';
 import RTCFrameGenView from '../components/RTCFrameGenView';
@@ -264,6 +267,12 @@ export function NativeStreamScreenBase({
   const [isInPictureInPicture, setIsInPictureInPicture] = React.useState(false);
   const isInPictureInPictureRef = React.useRef(false);
   const [isRecording, setIsRecording] = React.useState(false);
+  // YouTube needs a full picture (keyframe) every few seconds; the hook calls this every 2 s.
+  // (activeWebrtcClientRef is declared below; this only runs after the first render.)
+  const {liveState, bitrateKbps, toggleLive} = useLiveStream(() => {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    activeWebrtcClientRef.current?.requestVideoKeyframe?.(true);
+  });
 
   React.useEffect(() => {
     return () => {
@@ -2997,6 +3006,7 @@ export function NativeStreamScreenBase({
 
     const activeRecording = await gameRecorder.isRecording().catch(() => false);
     setIsRecording(activeRecording);
+    const activeLive = await liveStream.getLiveState().catch(() => 'idle');
 
     const items: Array<{
       id: string;
@@ -3059,6 +3069,11 @@ export function NativeStreamScreenBase({
         id: 'toggleVirtualGamepad',
         title: t('Toggle Virtual Gamepad'),
         active: showVirtualGamepad,
+      });
+      items.push({
+        id: 'toggleLive',
+        title:
+          activeLive !== 'idle' ? `🔴 ${t('LiveStop')}` : `🔴 ${t('LiveStart')}`,
       });
       items.push({
         id: 'toggleRecording',
@@ -3141,6 +3156,10 @@ export function NativeStreamScreenBase({
         }
         setShowVirtualGamepad(!showVirtualGamepad);
         break;
+      case 'toggleLive': {
+        await toggleLive();
+        break;
+      }
       case 'toggleRecording': {
         const currentlyRecording = await gameRecorder
           .isRecording()
@@ -3243,6 +3262,7 @@ export function NativeStreamScreenBase({
     showPerformance,
     showVirtualGamepad,
     isRecording,
+    toggleLive,
     t,
   ]);
 
@@ -3569,6 +3589,9 @@ export function NativeStreamScreenBase({
       />
 
       <RecordingIndicator visible={isRecording} />
+      {!isInPictureInPicture && (
+        <LiveIndicator state={liveState} bitrateKbps={bitrateKbps} />
+      )}
 
       {playtimeReminder.visible && !isInPictureInPicture && (
         <View style={styles.playtimeReminderBanner} pointerEvents="box-none">

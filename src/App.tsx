@@ -67,6 +67,7 @@ import GameMapScreen from './pages/GameMap';
 import NativeGameMapScreen from './pages/NativeGameMap';
 import GameMapDetailScreen from './pages/GameMapDetail';
 import DisplaySettingsScreen from './pages/DisplaySettings';
+import LiveSettingsScreen from './pages/LiveSettings';
 import AboutScreen from './pages/About';
 import AboutZhScreen from './pages/AboutZh';
 import FeedbackScreen from './pages/Feedback';
@@ -233,6 +234,7 @@ const GameMapDetailBackgroundScreen = withPageBackground(GameMapDetailScreen);
 const DisplaySettingsBackgroundScreen = withPageBackground(
   DisplaySettingsScreen,
 );
+const LiveSettingsBackgroundScreen = withPageBackground(LiveSettingsScreen);
 const AboutBackgroundScreen = withPageBackground(AboutScreen);
 const AboutZhBackgroundScreen = withPageBackground(AboutZhScreen);
 const FeedbackBackgroundScreen = withPageBackground(FeedbackScreen);
@@ -599,6 +601,11 @@ function App() {
                   name="Display"
                   component={DisplaySettingsBackgroundScreen}
                   options={{title: t('Display')}}
+                />
+                <RootStack.Screen
+                  name="LiveSettings"
+                  component={LiveSettingsBackgroundScreen}
+                  options={{title: t('LiveSettingsTitle')}}
                 />
                 <RootStack.Screen
                   name="Search"
