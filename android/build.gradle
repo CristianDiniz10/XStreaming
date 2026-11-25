@@ -12,13 +12,16 @@ buildscript {
         ndkVersion = "23.1.7779620"
     }
     repositories {
-//        google()
+        google()
 //        mavenCentral()
         maven { url 'https://maven.aliyun.com/repository/google' }
         maven { url 'https://maven.aliyun.com/repository/public' }
         maven { url 'https://repo1.maven.org/maven2/' }
     }
     dependencies {
+        // Newer R8/D8 than the one bundled with AGP 7.4: RootEncoder ships bytecode the old
+        // dexer crashes on. Must come before the Android Gradle plugin.
+        classpath("com.android.tools:r8:8.5.35")
         classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
     }
