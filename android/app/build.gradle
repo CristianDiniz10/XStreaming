@@ -181,6 +181,10 @@ def nanoRustTargetMap = [
 ]
 
 def nanoRustHostTag = { ndkDir ->
+    // Also build on Linux (GitHub Actions), not only on a Mac.
+    if (file("${ndkDir}/toolchains/llvm/prebuilt/linux-x86_64").exists()) {
+        return "linux-x86_64"
+    }
     def armTag = file("${ndkDir}/toolchains/llvm/prebuilt/darwin-arm64")
     if (armTag.exists()) {
         return "darwin-arm64"
