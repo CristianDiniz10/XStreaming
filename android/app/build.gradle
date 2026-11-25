@@ -299,3 +299,8 @@ repositories {
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
 apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
+
+// RootEncoder 2.8.x declares minCompileSdk 35, but this app still builds with AGP 7.4 / SDK 34
+// (AGP 7.4's aapt2 cannot read the android-35 platform). The library only uses newer APIs behind
+// runtime version checks, so the metadata check is skipped.
+tasks.matching { it.name.endsWith("AarMetadata") }.configureEach { enabled = false }
