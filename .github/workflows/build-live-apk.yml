@@ -22,7 +22,10 @@ jobs:
         run: corepack enable
 
       - name: Install JS dependencies
-        run: yarn install --immutable || yarn install
+        # The upstream lockfile is slightly out of date, so let Yarn update it here.
+        run: yarn install
+        env:
+          YARN_ENABLE_IMMUTABLE_INSTALLS: "false"
 
       - uses: actions/setup-java@v4
         with:
